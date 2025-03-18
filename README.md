@@ -13,7 +13,7 @@
 - **Python** (Core logic)  
 - **pandas** (CSV/Excel handling)  
 - **PyMuPDF (fitz)** (PDF text extraction)  
-- **Ollama (Phi model)** (AI-powered chat & summarization)  
+- **Ollama (llama3 model)** (AI-powered chat & summarization)  
 - **OS module** (File management)  
 
 ---  
