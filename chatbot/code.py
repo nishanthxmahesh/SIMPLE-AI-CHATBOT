@@ -26,12 +26,12 @@ class Chatbot:
                 if filename.endswith(".csv"):
                     df = pd.read_csv(file_path)
                     self.data_sources[file_path] = df
-                    self.current_data = df.to_string(index=False)
+                    self.current_data = df.to_markdown(index=False)
                     print(f"✔️ Loaded CSV: {os.path.basename(file_path)}")
                 elif filename.endswith((".xlsx", ".xls")):
                     df = pd.read_excel(file_path)
                     self.data_sources[file_path] = df
-                    self.current_data = df.to_string(index=False)
+                    self.current_data = df.to_markdown(index=False)
                     print(f"✔️ Loaded Excel: {os.path.basename(file_path)}")
                 elif filename.endswith(".pdf"):
                     doc = fitz.open(file_path)
@@ -51,11 +51,17 @@ class Chatbot:
             return "⚠️ No file loaded."
 
         try:
+            prompt = (
+                "Below is some file content (Excel/CSV/PDF). "
+                "Please summarize key insights or information in 75-100 characters only.\n\n"
+                f"{self.current_data[:3000]}"
+            )
+
             response = ollama.chat(
                 model="llama3",
                 messages=[
-                    {"role": "system", "content": "Summarize this data in 75-100 characters."},
-                    {"role": "user", "content": self.current_data[:3000]}
+                    {"role": "system", "content": "You are a helpful assistant who gives short, precise summaries of file content."},
+                    {"role": "user", "content": prompt}
                 ]
             )
             summary = response['message']['content'].strip()
@@ -68,11 +74,16 @@ class Chatbot:
             return "⚠️ No file loaded."
 
         try:
+            prompt = (
+                "Below is the loaded file content. Please answer ONLY questions related to this file in 100 characters max.\n\n"
+                f"{self.current_data[:3000]}\n\nQuestion: {user_input}"
+            )
+
             response = ollama.chat(
                 model="llama3",
                 messages=[
-                    {"role": "system", "content": "Answer file-related questions. Respond within 100 characters."},
-                    {"role": "user", "content": f"{self.current_data[:3000]}\n\nQuestion: {user_input}"}
+                    {"role": "system", "content": "Answer only file-related questions clearly in 100 characters."},
+                    {"role": "user", "content": prompt}
                 ]
             )
             reply = response['message']['content'].strip()
@@ -82,7 +93,7 @@ class Chatbot:
         except Exception as e:
             return f"❌ Chat error: {e}"
 
-# Main Program
+# ------------------- Main Program -------------------
 chatbot = Chatbot()
 chatbot.load_file()
 
